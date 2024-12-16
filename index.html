@@ -7,7 +7,6 @@
     <title>Color Picker Canvas</title>
     <link rel="stylesheet" href="web.css">
 </head>
-
 <body>
     <div id="controls">
         <label for="color-picker">Pick a color: </label>
@@ -16,16 +15,23 @@
 
     <div id="canvas"></div>
 
-    <button id="export-button">Export JSON</button>
+    <div id="button-container">
+        <button class="button" id="export-button">Export JSON</button>
+        <button class="button" id="reset-button">Reset</button>
+        <button class="button" id="undo-button">Undo</button>
+    </div>
 
     <script>
         // Initialize canvas state
         const canvasState = Array.from({ length: 10 }, () => Array(10).fill(null));
+        const history = [];
 
         // Select DOM elements
         const colorPicker = document.getElementById('color-picker');
         const canvas = document.getElementById('canvas');
         const exportButton = document.getElementById('export-button');
+        const resetButton = document.getElementById('reset-button');
+        const undoButton = document.getElementById('undo-button');
 
         // Create canvas
         for (let row = 0; row < 10; row++) {
@@ -39,6 +45,8 @@
                 box.addEventListener('click', () => {
                     const currentColor = box.style.backgroundColor;
                     const newColor = colorPicker.value;
+
+                    history.push(JSON.parse(JSON.stringify(canvasState)));
 
                     if (currentColor && currentColor !== 'rgb(240, 240, 240)') {
                         box.style.backgroundColor = '#f0f0f0';
@@ -67,7 +75,32 @@
             a.click();
             URL.revokeObjectURL(url);
         });
+
+        // Reset button functionality
+        resetButton.addEventListener('click', () => {
+            history.push(JSON.parse(JSON.stringify(canvasState)));
+            for (let row = 0; row < 10; row++) {
+                for (let col = 0; col < 10; col++) {
+                    canvasState[row][col] = null;
+                    const box = canvas.querySelector(`[data-row='${row}'][data-col='${col}']`);
+                    box.style.backgroundColor = '#f0f0f0';
+                }
+            }
+        });
+
+        // Undo button functionality
+        undoButton.addEventListener('click', () => {
+            if (history.length > 0) {
+                const previousState = history.pop();
+                for (let row = 0; row < 10; row++) {
+                    for (let col = 0; col < 10; col++) {
+                        canvasState[row][col] = previousState[row][col];
+                        const box = canvas.querySelector(`[data-row='${row}'][data-col='${col}']`);
+                        box.style.backgroundColor = previousState[row][col] || '#f0f0f0';
+                    }
+                }
+            }
+        });
     </script>
 </body>
-
 </html>
