@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Color Picker Canvas</title>
+    <link rel="stylesheet" href="web.css">
+</head>
+
+<body>
+    <div id="controls">
+        <label for="color-picker">Pick a color: </label>
+        <input type="color" id="color-picker" value="#000000">
+    </div>
+
+    <div id="canvas"></div>
+
+    <button id="export-button">Export JSON</button>
+
+    <script>
+        // Initialize canvas state
+        const canvasState = Array.from({ length: 10 }, () => Array(10).fill(null));
+
+        // Select DOM elements
+        const colorPicker = document.getElementById('color-picker');
+        const canvas = document.getElementById('canvas');
+        const exportButton = document.getElementById('export-button');
+
+        // Create canvas
+        for (let row = 0; row < 10; row++) {
+            for (let col = 0; col < 10; col++) {
+                const box = document.createElement('div');
+                box.className = 'box';
+                box.dataset.row = row;
+                box.dataset.col = col;
+
+                // Add click event to toggle color
+                box.addEventListener('click', () => {
+                    const currentColor = box.style.backgroundColor;
+                    const newColor = colorPicker.value;
+
+                    if (currentColor && currentColor !== 'rgb(240, 240, 240)') {
+                        box.style.backgroundColor = '#f0f0f0';
+                        canvasState[row][col] = null;
+                    } else {
+                        box.style.backgroundColor = newColor;
+                        canvasState[row][col] = newColor;
+                    }
+                });
+
+                canvas.appendChild(box);
+            }
+        }
+
+        // Export button functionality
+        exportButton.addEventListener('click', () => {
+            const jsonOutput = JSON.stringify(canvasState, null, 2);
+            console.log(jsonOutput);
+
+            // Download JSON file
+            const blob = new Blob([jsonOutput], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'canvas.json';
+            a.click();
+            URL.revokeObjectURL(url);
+        });
+    </script>
+</body>
+
+</html>
